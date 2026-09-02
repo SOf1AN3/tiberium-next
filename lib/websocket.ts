@@ -22,6 +22,9 @@ class WebSocketClient {
       return new Promise((resolve, reject) => {
          try {
             const wsUrl = new URL(this.url);
+            if (wsUrl.pathname === '/' || wsUrl.pathname === '') {
+               wsUrl.pathname = '/ws';
+            }
             wsUrl.searchParams.append('token', this.token);
 
             this.ws = new WebSocket(wsUrl.toString());

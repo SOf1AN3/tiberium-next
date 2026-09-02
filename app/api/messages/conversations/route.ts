@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import connectToDatabase from '@/lib/db';
 import { Message, User } from '@/lib/models';
 import { verifyAuth } from '@/lib/auth';
@@ -20,12 +21,14 @@ export async function GET(request: NextRequest) {
       const userId = authResult.payload.userId;
 
       // Get all conversations for the user (unique pairs of sender/receiver)
+      const objectUserId = new mongoose.Types.ObjectId(userId);
+
       const conversations = await Message.aggregate([
          {
             $match: {
                $or: [
-                  { senderId: { $oid: userId } },
-                  { receiverId: { $oid: userId } },
+                  { senderId: objectUserId },
+                  { receiverId: objectUserId },
                ],
             },
          },

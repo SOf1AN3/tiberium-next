@@ -29,9 +29,14 @@ export function useWebSocketMessages() {
 
       setWs(existingWs);
 
-      existingWs.connect().then(() => {
-         setIsConnected(true);
-      });
+      existingWs
+         .connect()
+         .then(() => {
+            setIsConnected(true);
+         })
+         .catch(() => {
+            // Connection failed; reconnection is handled by WebSocketClient
+         });
 
       // Listen for incoming messages
       const unsubscribeMessage = existingWs.on('MESSAGE_RECEIVE', (data) => {

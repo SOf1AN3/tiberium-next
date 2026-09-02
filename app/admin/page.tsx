@@ -13,7 +13,7 @@ interface User {
 }
 
 export default function AdminPanel() {
-   const { user, token, isAuthenticated } = useAuth();
+   const { user, token, isAuthenticated, isLoading: authLoading } = useAuth();
    const router = useRouter();
    const [users, setUsers] = useState<User[]>([]);
    const [isLoading, setIsLoading] = useState(true);
@@ -21,12 +21,13 @@ export default function AdminPanel() {
 
    // Redirect if not authenticated or not admin
    useEffect(() => {
+      if (authLoading) return;
       if (!isAuthenticated) {
          router.push('/login');
       } else if (user?.type !== 'admin') {
          router.push('/');
       }
-   }, [isAuthenticated, user, router]);
+   }, [authLoading, isAuthenticated, user, router]);
 
    // Fetch users
    useEffect(() => {
@@ -82,78 +83,74 @@ export default function AdminPanel() {
       }
    };
 
-   if (!isAuthenticated || user?.type !== 'admin') {
+   const confirmedCount = users.filter((u) => u.isConfirmed).length;
+   const adminCount = users.filter((u) => u.type === 'admin').length;
+
+   if (authLoading || !isAuthenticated || user?.type !== 'admin') {
       return null;
    }
 
    return (
-      <div className="min-h-screen bg-gray-50">
-         {/* Header */}
-         <header className="bg-white shadow">
-            <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-               <h1 className="text-2xl font-bold text-blue-600">Admin Panel</h1>
-               <button
-                  onClick={() => router.push('/')}
-                  className="text-gray-600 hover:text-gray-900"
-               >
-                  Back to Home
-               </button>
-            </nav>
-         </header>
-
-         {/* Main Content */}
-         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="bg-white rounded-lg shadow">
-               <div className="px-6 py-4 border-b border-gray-200">
-                  <h2 className="text-lg font-bold text-gray-900">User Management</h2>
+      <div className="admin-page">
+         <main className="page-main">
+            <div className="admin-stats">
+               <div className="stat-card">
+                  <strong>{users.length}</strong>
+                  <span>Total users</span>
+               </div>
+               <div className="stat-card">
+                  <strong>{confirmedCount}</strong>
+                  <span>Confirmed</span>
+               </div>
+               <div className="stat-card">
+                  <strong>{adminCount}</strong>
+                  <span>Admins</span>
+               </div>
+            </div>
+            <div className="admin-panel">
+               <div className="admin-panel-header">
+                  <h1 className="admin-title no-select">Admin Panel</h1>
+                  <span className="admin-subtitle no-select">
+                     User Management — {users.length} user{users.length === 1 ? '' : 's'}
+                  </span>
+                  <button className="btn btn-secondary admin-link" onClick={() => router.push('/')}>
+                     Back to Home
+                  </button>
                </div>
 
-               {error && (
-                  <div className="px-6 py-4 bg-red-50 border-b border-red-200">
-                     <p className="text-sm text-red-700">{error}</p>
-                  </div>
-               )}
+               {error && <div className="admin-error">{error}</div>}
 
                {isLoading ? (
-                  <div className="px-6 py-12 text-center">
-                     <p className="text-gray-500">Loading users...</p>
+                  <div className="admin-loading">
+                     <div className="loading-spinner"></div>
+                     <p>Loading users...</p>
                   </div>
                ) : users.length === 0 ? (
-                  <div className="px-6 py-12 text-center">
-                     <p className="text-gray-500">No users found</p>
+                  <div className="admin-loading">
+                     <p>No users found</p>
                   </div>
                ) : (
-                  <div className="overflow-x-auto">
-                     <table className="w-full">
-                        <thead className="bg-gray-50">
+                  <div className="admin-table-wrap">
+                     <table className="admin-table">
+                        <thead>
                            <tr>
-                              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                                 Name
-                              </th>
-                              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                                 Email
-                              </th>
-                              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                                 Type
-                              </th>
-                              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                                 Status
-                              </th>
-                              <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                                 Actions
-                              </th>
+                              <th>Name</th>
+                              <th>Email</th>
+                              <th>Type</th>
+                              <th>Status</th>
+                              <th>Actions</th>
                            </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-200">
+                        <tbody>
                            {users.map((u) => (
-                              <tr key={u.id} className="hover:bg-gray-50">
-                                 <td className="px-6 py-4 text-sm text-gray-900">{u.name}</td>
-                                 <td className="px-6 py-4 text-sm text-gray-600">{u.email}</td>
-                                 <td className="px-6 py-4 text-sm">
+                              <tr key={u.id} className="admin-row">
+                                 <td className="admin-name">{u.name}</td>
+                                 <td className="admin-email">{u.email}</td>
+                                 <td>
                                     <select
                                        value={u.type}
                                        onChange={(e) => handleUpdateUserType(u.id, e.target.value)}
-                                       className="rounded border border-gray-300 px-2 py-1 text-sm"
+                                       className="admin-select"
                                     >
                                        <option value="simple">Simple</option>
                                        <option value="advanced">Advanced</option>
@@ -161,20 +158,13 @@ export default function AdminPanel() {
                                        <option value="admin">Admin</option>
                                     </select>
                                  </td>
-                                 <td className="px-6 py-4 text-sm">
-                                    <span
-                                       className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${u.isConfirmed
-                                             ? 'bg-green-100 text-green-800'
-                                             : 'bg-yellow-100 text-yellow-800'
-                                          }`}
-                                    >
-                                       {u.isConfirmed ? 'Confirmed' : 'Pending'}
-                                    </span>
-                                 </td>
-                                 <td className="px-6 py-4 text-sm">
-                                    <button className="text-blue-600 hover:text-blue-900">
-                                       View Profile
-                                    </button>
+<td>
+                     <span className={`badge ${u.isConfirmed ? 'badge-confirmed' : 'badge-pending'}`}>
+                        {u.isConfirmed ? 'Confirmed' : 'Pending'}
+                     </span>
+                  </td>
+                                 <td>
+                                    <button className="btn admin-link">View Profile</button>
                                  </td>
                               </tr>
                            ))}

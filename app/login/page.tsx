@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
-import Header from '@/components/Header';
 
 export default function LoginPage() {
    const { t } = useTranslation();
@@ -33,63 +32,57 @@ export default function LoginPage() {
       try {
          await login(formData.email, formData.password);
          router.push('/');
-      } catch (err: any) {
-         setError(err.message || 'Login failed');
+      } catch (err) {
+         setError(err instanceof Error ? err.message : 'Login failed');
       }
    };
 
    return (
-      <div className="connexion-page">
-         <div
-            className="background-fixe"
-            style={{ backgroundImage: `url('/images/background.jpg')`, opacity: 0.9 }}
-         ></div>
-         <Header />
-         <div className="connexion-content">
-            <div className="connexion-container">
-               <div className="connexion-form">
-                  <form onSubmit={handleSubmit}>
-                     <h1>{t('connexion_title')}</h1>
-                     {error && <div className="error-message">{error}</div>}
-                     <input
-                        type="email"
-                        name="email"
-                        className="text-input"
-                        placeholder={t('connexion_email_placeholder')}
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                     />
-                     <input
-                        type="password"
-                        name="password"
-                        className="text-input"
-                        placeholder={t('connexion_password_placeholder')}
-                        value={formData.password}
-                        onChange={handleChange}
-                        required
-                     />
-                     <div className="rester-container">
-                        <input
-                           type="checkbox"
-                           name="rester"
-                           id="rester"
-                           className="rester"
-                           checked={formData.rester}
-                           onChange={handleChange}
-                        />
-                        <label htmlFor="rester" className="rester-label">
-                           {t('connexion_rester_label')}
-                        </label>
-                     </div>
-                     <button type="submit">{t('connexion_button')}</button>
-                     <Link className="inscrire" href="/signup">
-                        {t('connexion_signup_link')}
-                     </Link>
-                  </form>
+      <div className="auth-page">
+         <main className="auth-card">
+            <form onSubmit={handleSubmit}>
+               <h1>{t('connexion_title')}</h1>
+               {error && <div className="error-message">{error}</div>}
+               <input
+                  type="email"
+                  name="email"
+                  className="text-input"
+                  placeholder={t('connexion_email_placeholder')}
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+               />
+               <input
+                  type="password"
+                  name="password"
+                  className="text-input"
+                  placeholder={t('connexion_password_placeholder')}
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+               />
+               <div className="rester-container">
+                  <input
+                     type="checkbox"
+                     name="rester"
+                     id="rester"
+                     className="rester"
+                     checked={formData.rester}
+                     onChange={handleChange}
+                  />
+                  <label htmlFor="rester" className="rester-label">
+                     {t('connexion_rester_label')}
+                  </label>
                </div>
-            </div>
-         </div>
+               <button type="submit" className="btn btn-primary auth-submit">
+                  {t('connexion_button')}
+               </button>
+               <div className="auth-link">
+                  {t('connexion_signup_link')}{' '}
+                  <Link href="/signup">{t('inscription_title')}</Link>
+               </div>
+            </form>
+         </main>
       </div>
    );
 }

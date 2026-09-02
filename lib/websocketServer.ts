@@ -2,8 +2,6 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { Server as HTTPServer } from 'http';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
 interface AuthenticatedWebSocket extends WebSocket {
    userId?: string;
    userType?: string;
@@ -62,7 +60,12 @@ class WebSocketManager {
       }
 
       try {
-         const decoded = jwt.verify(token, JWT_SECRET || '') as any;
+         const JWT_SECRET = process.env.JWT_SECRET;
+         if (!JWT_SECRET) {
+            ws.close(1011, 'Server not configured');
+            return;
+         }
+         const decoded = jwt.verify(token, JWT_SECRET) as any;
          if (!decoded.userId || !decoded.type) {
             ws.close(1008, 'Invalid token payload');
             return;
