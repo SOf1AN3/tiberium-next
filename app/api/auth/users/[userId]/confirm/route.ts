@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import { User } from '@/lib/models';
-import { verifyAuth, getTokenFromHeaders } from '@/lib/auth';
+import { verifyAuth } from '@/lib/auth';
 
-export async function GET(request: NextRequest) {
+export async function PATCH(
+   request: NextRequest,
+   { params }: { params: Promise<{ userId: string }> }
+) {
    try {
       await connectToDatabase();
 
+      const { userId } = await params;
       const authHeader = request.headers.get('authorization');
       const authResult = await verifyAuth(authHeader);
 
@@ -17,8 +21,15 @@ export async function GET(request: NextRequest) {
          );
       }
 
-      // Get user from database
-      const user = await User.findById(authResult.payload.userId).select('-password');
+      const currentUser = await User.findById(authResult.payload.userId);
+      if (!currentUser || currentUser.type !== 'admin') {
+         return NextResponse.json(
+            { error: true, message: 'Only admins can toggle confirmation' },
+            { status: 403 }
+         );
+      }
+
+      const user = await User.findById(userId);
       if (!user) {
          return NextResponse.json(
             { error: true, message: 'User not found' },
@@ -26,9 +37,13 @@ export async function GET(request: NextRequest) {
          );
       }
 
-      const response = NextResponse.json(
+      user.isConfirmed = !user.isConfirmed;
+      await user.save();
+
+      return NextResponse.json(
          {
             error: false,
+            message: `User ${user.isConfirmed ? 'confirmed' : 'unconfirmed'} successfully`,
             user: {
                id: user._id,
                name: user.name,
@@ -39,20 +54,8 @@ export async function GET(request: NextRequest) {
          },
          { status: 200 }
       );
-
-      // Restore the token cookie so middleware keeps the user logged in across refreshes
-      const token = getTokenFromHeaders(request.headers.get('authorization'));
-      if (token) {
-         response.cookies.set('token', token, {
-            path: '/',
-            maxAge: 7 * 24 * 60 * 60,
-            httpOnly: false,
-         });
-      }
-
-      return response;
    } catch (error) {
-      console.error('Check auth error:', error);
+      console.error('Toggle confirmation error:', error);
       return NextResponse.json(
          { error: true, message: 'Internal server error' },
          { status: 500 }

@@ -27,20 +27,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    const [token, setToken] = useState<string | null>(null);
    const [isLoading, setIsLoading] = useState(true);
 
-   // Initialize auth from localStorage
-   useEffect(() => {
-      const initAuth = async () => {
-         const savedToken = localStorage.getItem('token');
-         if (savedToken) {
-            setToken(savedToken);
-            await checkAuthWithToken(savedToken);
-         }
-         setIsLoading(false);
-      };
-
-      initAuth();
-   }, []);
-
    const checkAuthWithToken = async (authToken: string) => {
       try {
          const response = await fetch('/api/auth/check', {
@@ -64,6 +50,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
          document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
       }
    };
+
+   // Initialize auth from localStorage
+   useEffect(() => {
+      const initAuth = async () => {
+         const savedToken = localStorage.getItem('token');
+         if (savedToken) {
+            setToken(savedToken);
+            await checkAuthWithToken(savedToken);
+         }
+         setIsLoading(false);
+      };
+
+      initAuth();
+   }, []);
 
    const setTokenWithCookie = (newToken: string) => {
       setToken(newToken);

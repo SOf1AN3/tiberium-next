@@ -12,9 +12,11 @@ export function middleware(request: NextRequest) {
       return NextResponse.next();
    }
 
-   // If no token, redirect to login (for protected paths)
+   // If no token, redirect to login with next parameter
    if (!token && !publicPaths.includes(pathname)) {
-      return NextResponse.redirect(new URL('/login', request.url));
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('next', pathname);
+      return NextResponse.redirect(loginUrl);
    }
 
    return NextResponse.next();

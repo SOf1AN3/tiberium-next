@@ -1,15 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 
 export default function SignupPage() {
    const { t } = useTranslation();
-   const { signup } = useAuth();
+   const { signup, isAuthenticated, isLoading } = useAuth();
    const router = useRouter();
+   const searchParams = useSearchParams();
    const [formData, setFormData] = useState({
       name: '',
       email: '',
@@ -17,6 +18,14 @@ export default function SignupPage() {
       confirmPassword: ''
    });
    const [error, setError] = useState('');
+
+   const redirectTo = searchParams.get('next') || '/';
+
+   useEffect(() => {
+      if (!isLoading && isAuthenticated) {
+         router.push(redirectTo);
+      }
+   }, [isAuthenticated, isLoading, router, redirectTo]);
 
    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setFormData({

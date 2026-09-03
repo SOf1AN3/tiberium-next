@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
-import { Message } from '@/lib/models';
+import { Message, Conversation } from '@/lib/models';
 import { verifyAuth } from '@/lib/auth';
 
 export async function GET(
@@ -22,6 +22,21 @@ export async function GET(
       }
 
       const currentUserId = authResult.payload.userId;
+
+      // Verify there is an active conversation between the two users
+      const conversation = await Conversation.findOne({
+         $or: [
+            { clientId: currentUserId, adminId: targetUserId, status: 'active' },
+            { clientId: targetUserId, adminId: currentUserId, status: 'active' },
+         ],
+      });
+
+      if (!conversation) {
+         return NextResponse.json(
+            { error: true, message: 'No active conversation with this user' },
+            { status: 403 }
+         );
+      }
 
       // Get messages between two users
       const messages = await Message.find({

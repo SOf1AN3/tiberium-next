@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
          type: newUser.type,
       });
 
-      return NextResponse.json(
+      const response = NextResponse.json(
          {
             error: false,
             message: 'User created successfully',
@@ -62,6 +62,15 @@ export async function POST(request: NextRequest) {
          },
          { status: 201 }
       );
+
+      // Set cookie server-side so middleware stays in sync on refresh
+      response.cookies.set('token', token, {
+         path: '/',
+         maxAge: 7 * 24 * 60 * 60,
+         httpOnly: false,
+      });
+
+      return response;
    } catch (error) {
       console.error('Signup error:', error);
       return NextResponse.json(

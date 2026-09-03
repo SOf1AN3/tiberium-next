@@ -1,21 +1,30 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 
 export default function LoginPage() {
    const { t } = useTranslation();
-   const { login } = useAuth();
+   const { login, isAuthenticated, isLoading } = useAuth();
    const router = useRouter();
+   const searchParams = useSearchParams();
    const [formData, setFormData] = useState({
       email: '',
       password: '',
       rester: false
    });
    const [error, setError] = useState('');
+
+const redirectTo = searchParams.get('next') || '/';
+
+    useEffect(() => {
+       if (!isLoading && isAuthenticated) {
+          router.push(redirectTo);
+       }
+    }, [isAuthenticated, isLoading, router, redirectTo]);
 
    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;

@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
          type: user.type,
       });
 
-      return NextResponse.json(
+      const response = NextResponse.json(
          {
             error: false,
             message: 'Login successful',
@@ -57,6 +57,15 @@ export async function POST(request: NextRequest) {
          },
          { status: 200 }
       );
+
+      // Set cookie server-side so middleware stays in sync on refresh
+      response.cookies.set('token', token, {
+         path: '/',
+         maxAge: 7 * 24 * 60 * 60,
+         httpOnly: false,
+      });
+
+      return response;
    } catch (error) {
       console.error('Login error:', error);
       return NextResponse.json(

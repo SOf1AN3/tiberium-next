@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import mongoose from 'mongoose';
 import connectToDatabase from '@/lib/db';
-import { Message, User } from '@/lib/models';
+import { Conversation, User } from '@/lib/models';
 import { verifyAuth } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
@@ -19,56 +18,35 @@ export async function GET(request: NextRequest) {
       }
 
       const userId = authResult.payload.userId;
+      const userType = authResult.payload.type;
 
-      // Get all conversations for the user (unique pairs of sender/receiver)
-      const objectUserId = new mongoose.Types.ObjectId(userId);
+      // Only return conversations the user is part of
+      const filter: Record<string, unknown> = { status: 'active' };
+      if (userType === 'admin') {
+         filter.adminId = userId;
+      } else {
+         filter.clientId = userId;
+      }
 
-      const conversations = await Message.aggregate([
-         {
-            $match: {
-               $or: [
-                  { senderId: objectUserId },
-                  { receiverId: objectUserId },
-               ],
-            },
-         },
-         {
-            $group: {
-               _id: {
-                  $cond: [
-                     { $lt: ['$senderId', '$receiverId'] },
-                     { senderId: '$senderId', receiverId: '$receiverId' },
-                     { senderId: '$receiverId', receiverId: '$senderId' },
-                  ],
-               },
-               lastMessage: { $last: '$content' },
-               lastTimestamp: { $last: '$timestamp' },
-            },
-         },
-         {
-            $sort: { lastTimestamp: -1 },
-         },
-      ]);
+      const conversations = await Conversation.find(filter).lean();
 
-      // Fetch user details for each conversation
-      const conversationsWithUsers = await Promise.all(
+      const enriched = await Promise.all(
          conversations.map(async (conv) => {
-            const otherUserId =
-               conv._id.senderId.toString() === userId
-                  ? conv._id.receiverId
-                  : conv._id.senderId;
+            const linkedUserId =
+               userType === 'admin' ? conv.clientId : conv.adminId;
 
-            const otherUser = await User.findById(otherUserId).select('name email type');
+            const linkedUser = await User.findById(linkedUserId)
+               .select('name email type')
+               .lean();
 
             return {
-               otherUserId,
+               otherUserId: linkedUserId.toString(),
                otherUser: {
-                  name: otherUser?.name,
-                  email: otherUser?.email,
-                  type: otherUser?.type,
+                  name: linkedUser?.name ?? 'Unknown',
+                  email: linkedUser?.email ?? '',
+                  type: linkedUser?.type ?? 'unknown',
                },
-               lastMessage: conv.lastMessage,
-               lastTimestamp: conv.lastTimestamp,
+               conversationId: conv._id,
             };
          })
       );
@@ -76,7 +54,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
          {
             error: false,
-            conversations: conversationsWithUsers,
+            conversations: enriched,
          },
          { status: 200 }
       );

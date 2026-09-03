@@ -132,7 +132,7 @@ const Header = () => {
                                     </div>
                                  </div>
                                  <button className="dropdown-item" onClick={handleSettingsClick}>
-                                    {user.type === 'admin' ? t('header_settings') : t('header_chat')}
+                                    {user.type === 'admin' ? t('header_admin_panel') : t('header_chat')}
                                  </button>
                                  <button className="dropdown-item danger" onClick={() => setShowLogoutConfirm(true)}>
                                     {t('header_logout')}
@@ -176,7 +176,7 @@ const Header = () => {
                   <Link href="/about" onClick={closeMenu}>{t('header_about')}</Link>
                   {user && <Link href="/messages" onClick={closeMenu}>{t('header_chat')}</Link>}
                   {user?.type === 'admin' && (
-                     <Link href="/admin" onClick={closeMenu}>{t('header_settings')}</Link>
+                     <Link href="/admin" onClick={closeMenu}>{t('header_admin_panel')}</Link>
                   )}
                   <div className="mobile-menu-footer">
                      <div className="mobile-theme-row">

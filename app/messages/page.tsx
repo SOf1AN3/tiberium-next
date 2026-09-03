@@ -5,15 +5,25 @@ import { useWebSocketMessages } from '@/lib/hooks/useWebSocketMessages';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
-interface Conversation {
-   otherUserId: string;
-   otherUser: {
+interface LinkedUser {
+   _id: string;
+   linkedUserId: string;
+   linkedUser: {
       name: string;
       email: string;
       type: string;
    };
-   lastMessage: string;
-   lastTimestamp: Date;
+   status: string;
+   createdAt: string;
+}
+
+interface UnassignedClient {
+   _id: string;
+   name: string;
+   email: string;
+   type: string;
+   isConfirmed: boolean;
+   createdAt: string;
 }
 
 interface Message {
@@ -38,12 +48,19 @@ export default function MessagesPage() {
    const router = useRouter();
    const { messages, isConnected, sendMessage } = useWebSocketMessages();
 
-   const [conversations, setConversations] = useState<Conversation[]>([]);
+   const [conversations, setConversations] = useState<LinkedUser[]>([]);
    const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
    const [messageText, setMessageText] = useState('');
    const [search, setSearch] = useState('');
    const [isLoading, setIsLoading] = useState(true);
    const [historyMessages, setHistoryMessages] = useState<Message[]>([]);
+
+   const [showNewClientModal, setShowNewClientModal] = useState(false);
+   const [unassignedClients, setUnassignedClients] = useState<UnassignedClient[]>([]);
+   const [loadingUnassigned, setLoadingUnassigned] = useState(false);
+   const [creatingConversation, setCreatingConversation] = useState(false);
+
+   const isAdmin = user?.type === 'admin';
 
    useEffect(() => {
       if (!isAuthenticated) {
@@ -56,10 +73,8 @@ export default function MessagesPage() {
          if (!token) return;
 
          try {
-            const response = await fetch('/api/messages/conversations', {
-               headers: {
-                  Authorization: `Bearer ${token}`,
-               },
+            const response = await fetch('/api/conversations', {
+               headers: { Authorization: `Bearer ${token}` },
             });
 
             if (response.ok) {
@@ -99,9 +114,7 @@ export default function MessagesPage() {
 
          try {
             const response = await fetch(`/api/messages/history/${selectedUserId}`, {
-               headers: {
-                  Authorization: `Bearer ${token}`,
-               },
+               headers: { Authorization: `Bearer ${token}` },
             });
 
             if (response.ok) {
@@ -143,13 +156,83 @@ export default function MessagesPage() {
       setMessageText('');
    };
 
+   const openNewClientModal = async () => {
+      setShowNewClientModal(true);
+      setLoadingUnassigned(true);
+      try {
+         const response = await fetch('/api/conversations/unassigned', {
+            headers: { Authorization: `Bearer ${token}` },
+         });
+         if (response.ok) {
+            const data = await response.json();
+            setUnassignedClients(data.clients || []);
+         }
+      } catch (error) {
+         console.error('Failed to fetch unassigned clients:', error);
+      } finally {
+         setLoadingUnassigned(false);
+      }
+   };
+
+   const startConversation = async (clientId: string) => {
+      setCreatingConversation(true);
+      try {
+         const response = await fetch('/api/conversations', {
+            method: 'POST',
+            headers: {
+               'Content-Type': 'application/json',
+               Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ clientId }),
+         });
+
+         if (response.ok) {
+            setShowNewClientModal(false);
+            const convsResp = await fetch('/api/conversations', {
+               headers: { Authorization: `Bearer ${token}` },
+            });
+            if (convsResp.ok) {
+               const data = await convsResp.json();
+               setConversations(data.conversations || []);
+            }
+            setSelectedUserId(clientId);
+         }
+      } catch (error) {
+         console.error('Failed to create conversation:', error);
+      } finally {
+         setCreatingConversation(false);
+      }
+   };
+
+   const closeConversation = async () => {
+      if (!selectedUserId || !token) return;
+
+      const conv = conversations.find((c) => c.linkedUserId === selectedUserId);
+      if (!conv) return;
+
+      try {
+         const response = await fetch(`/api/conversations/${conv._id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` },
+         });
+
+         if (response.ok) {
+            setConversations((prev) => prev.filter((c) => c._id !== conv._id));
+            setSelectedUserId(null);
+            setHistoryMessages([]);
+         }
+      } catch (error) {
+         console.error('Failed to close conversation:', error);
+      }
+   };
+
    if (!isAuthenticated) {
       return null;
    }
 
-   const selectedConv = conversations.find((c) => c.otherUserId === selectedUserId);
+   const selectedConv = conversations.find((c) => c.linkedUserId === selectedUserId);
    const visibleConversations = conversations.filter((conv) =>
-      conv.otherUser.name.toLowerCase().includes(search.toLowerCase())
+      conv.linkedUser.name.toLowerCase().includes(search.toLowerCase())
    );
 
    return (
@@ -164,6 +247,15 @@ export default function MessagesPage() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                />
+               {isAdmin && (
+                  <button
+                     className="btn btn-primary"
+                     style={{ marginTop: 12, width: '100%' }}
+                     onClick={openNewClientModal}
+                  >
+                     + New client
+                  </button>
+               )}
             </div>
             <div className="chat-list">
                {isLoading ? (
@@ -172,22 +264,28 @@ export default function MessagesPage() {
                   </div>
                ) : visibleConversations.length === 0 ? (
                   <div className="chat-empty">
-                     <p>No conversations yet</p>
+                     {isAdmin ? (
+                        <p>No clients assigned yet</p>
+                     ) : (
+                        <p>Waiting for an admin to contact you...</p>
+                     )}
                   </div>
                ) : (
                   visibleConversations.map((conv) => (
                      <button
-                        key={conv.otherUserId}
-                        onClick={() => setSelectedUserId(conv.otherUserId)}
-                        className={`chat-item ${selectedUserId === conv.otherUserId ? 'selected' : ''}`}
+                        key={conv.linkedUserId}
+                        onClick={() => setSelectedUserId(conv.linkedUserId)}
+                        className={`chat-item ${selectedUserId === conv.linkedUserId ? 'selected' : ''}`}
                      >
-                        <span className="chat-avatar">{toInitials(conv.otherUser.name)}</span>
+                        <span className="chat-avatar">
+                           {toInitials(conv.linkedUser.name)}
+                        </span>
                         <span className="chat-item-body">
-                           <h3>{conv.otherUser.name}</h3>
-                           <p>{conv.lastMessage}</p>
+                           <h3>{conv.linkedUser.name}</h3>
+                           <p>{conv.linkedUser.email}</p>
                         </span>
                         <span className="chat-item-time">
-                           {new Date(conv.lastTimestamp).toLocaleDateString()}
+                           {new Date(conv.createdAt).toLocaleDateString()}
                         </span>
                      </button>
                   ))
@@ -199,11 +297,20 @@ export default function MessagesPage() {
             {selectedUserId ? (
                <>
                   <header className="chat-header">
-                     <h2>{selectedConv?.otherUser.name || 'Chat'}</h2>
-                     <span className={`chat-status ${isConnected ? 'online' : 'offline'}`}>
-                        <span className="chat-status-dot"></span>
-                        {isConnected ? 'Connected' : 'Offline'}
-                     </span>
+                     <h2>{selectedConv?.linkedUser.name || 'Chat'}</h2>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                        <span className={`chat-status ${isConnected ? 'online' : 'offline'}`}>
+                           <span className="chat-status-dot"></span>
+                           {isConnected ? 'Connected' : 'Offline'}
+                        </span>
+                        <button
+                           className="btn btn-ghost"
+                           style={{ fontSize: '0.8rem', color: 'var(--danger)' }}
+                           onClick={closeConversation}
+                        >
+                           Close
+                        </button>
+                     </div>
                   </header>
 
                   <div className="chat-body">
@@ -245,10 +352,81 @@ export default function MessagesPage() {
                </>
             ) : (
                <div className="chat-empty">
-                  <p>Select a conversation to start messaging</p>
+                  {isAdmin ? (
+                     <p>Select a client or assign a new one</p>
+                  ) : (
+                     <p>Your admin will reach out to you soon</p>
+                  )}
                </div>
             )}
          </section>
+
+         {showNewClientModal && (
+            <div
+               className="modal-overlay"
+               onClick={() => setShowNewClientModal(false)}
+            >
+               <div
+                  className="modal-content"
+                  onClick={(e) => e.stopPropagation()}
+                  style={{ maxWidth: 480, maxHeight: '80vh', overflow: 'auto' }}
+               >
+                  <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
+                     <h3>Assign a client</h3>
+                  </div>
+                  <div style={{ padding: 16 }}>
+                     {loadingUnassigned ? (
+                        <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
+                           Loading...
+                        </p>
+                     ) : unassignedClients.length === 0 ? (
+                        <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
+                           All clients are assigned
+                        </p>
+                     ) : (
+                        unassignedClients.map((client) => (
+                           <button
+                              key={client._id}
+                              style={{
+                                 width: '100%',
+                                 padding: '12px 16px',
+                                 display: 'flex',
+                                 alignItems: 'center',
+                                 gap: 12,
+                                 textAlign: 'left',
+                                 borderBottom: '1px solid var(--surface-2)',
+                                 background: 'none',
+                                 cursor: 'pointer',
+                              }}
+                              onClick={() => startConversation(client._id)}
+                              disabled={creatingConversation}
+                           >
+                              <span className="chat-avatar">{toInitials(client.name)}</span>
+                              <span className="chat-item-body">
+                                 <h3>{client.name}</h3>
+                                 <p>{client.email}</p>
+                              </span>
+                           </button>
+                        ))
+                     )}
+                  </div>
+                  <div
+                     style={{
+                        padding: '12px 24px',
+                        borderTop: '1px solid var(--border)',
+                        textAlign: 'right',
+                     }}
+                  >
+                     <button
+                        className="btn btn-ghost"
+                        onClick={() => setShowNewClientModal(false)}
+                     >
+                        Cancel
+                     </button>
+                  </div>
+               </div>
+            </div>
+         )}
       </div>
    );
 }

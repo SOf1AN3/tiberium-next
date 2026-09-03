@@ -11,6 +11,15 @@ interface IUser extends Document {
    updatedAt?: Date;
 }
 
+// Conversation Schema Types
+interface IConversation extends Document {
+   clientId: mongoose.Types.ObjectId;
+   adminId: mongoose.Types.ObjectId;
+   status: 'active' | 'closed';
+   createdAt?: Date;
+   updatedAt?: Date;
+}
+
 // Message Schema Types
 interface IMessage extends Document {
    senderId: mongoose.Types.ObjectId;
@@ -51,6 +60,31 @@ const userSchema = new Schema<IUser>(
    { timestamps: true }
 );
 
+// Conversation Schema
+const conversationSchema = new Schema<IConversation>(
+   {
+      clientId: {
+         type: Schema.Types.ObjectId,
+         ref: 'User',
+         required: true,
+      },
+      adminId: {
+         type: Schema.Types.ObjectId,
+         ref: 'User',
+         required: true,
+      },
+      status: {
+         type: String,
+         enum: ['active', 'closed'],
+         default: 'active',
+      },
+   },
+   { timestamps: true }
+);
+
+// One client can only have one admin at a time
+conversationSchema.index({ clientId: 1 }, { unique: true });
+
 // Message Schema
 const messageSchema = new Schema<IMessage>(
    {
@@ -86,6 +120,7 @@ messageSchema.index({ timestamp: -1 });
 
 // Create or get existing models
 export const User = mongoose.models.User || mongoose.model<IUser>('User', userSchema);
+export const Conversation = mongoose.models.Conversation || mongoose.model<IConversation>('Conversation', conversationSchema);
 export const Message = mongoose.models.Message || mongoose.model<IMessage>('Message', messageSchema);
 
-export type { IUser, IMessage };
+export type { IUser, IConversation, IMessage };

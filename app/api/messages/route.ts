@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
-import { Message, User } from '@/lib/models';
+import { Message, User, Conversation } from '@/lib/models';
 import { verifyAuth } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
@@ -37,9 +37,25 @@ export async function POST(request: NextRequest) {
          );
       }
 
+      // Enforce conversation link: sender and receiver must have an active conversation
+      const senderId = authResult.payload.userId;
+      const conversation = await Conversation.findOne({
+         $or: [
+            { clientId: senderId, adminId: receiverId, status: 'active' },
+            { clientId: receiverId, adminId: senderId, status: 'active' },
+         ],
+      });
+
+      if (!conversation) {
+         return NextResponse.json(
+            { error: true, message: 'No active conversation between you and this user' },
+            { status: 403 }
+         );
+      }
+
       // Create message
       const message = new Message({
-         senderId: authResult.payload.userId,
+         senderId: senderId,
          receiverId,
          content: content.trim(),
          timestamp: new Date(),
