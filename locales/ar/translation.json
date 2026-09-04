@@ -175,5 +175,11 @@
     "chat_type_placeholder": "اكتب رسالة...",
     "chat_send": "إرسال",
     "chat_assign_title": "تعيين عميل",
-    "chat_loading": "جارٍ التحميل..."
+    "chat_loading": "جارٍ التحميل...",
+    "footer_description": "استشارات وحلول رقمية: استشارات، دراسات السوق، التدريب والتحول الرقمي.",
+    "footer_navigation": "التنقل",
+    "footer_nav_home": "الرئيسية",
+    "footer_nav_about": "من نحن",
+    "footer_contact": "اتصل بنا",
+    "footer_copyright": "Copyrights © Tiberium Consulting {{year}}"
 }

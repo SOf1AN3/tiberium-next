@@ -175,5 +175,11 @@
     "chat_type_placeholder": "Type a message...",
     "chat_send": "Send",
     "chat_assign_title": "Assign a client",
-    "chat_loading": "Loading..."
+    "chat_loading": "Loading...",
+    "footer_description": "Consulting & digital solutions: consulting, market studies, training, and digital transformation.",
+    "footer_navigation": "Navigation",
+    "footer_nav_home": "Home",
+    "footer_nav_about": "About",
+    "footer_contact": "Contact",
+    "footer_copyright": "Copyrights © Tiberium Consulting {{year}}"
 }
