@@ -2874,3 +2874,49 @@ img {
 [dir="rtl"] .chat-search {
   text-align: right;
 }
+
+/* ============================================================
+   404 — Not Found
+   ============================================================ */
+.not-found-page {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  background:
+    radial-gradient(50% 50% at 20% 20%, rgba(79, 70, 229, 0.1), transparent 60%),
+    radial-gradient(40% 40% at 80% 30%, rgba(124, 58, 237, 0.1), transparent 55%),
+    var(--bg-gradient);
+}
+
+.not-found-content {
+  text-align: center;
+  max-width: 480px;
+  animation: popFadeIn 0.4s ease;
+}
+
+.not-found-code {
+  display: block;
+  font-size: 8rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 16px;
+}
+
+.not-found-content h1 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.not-found-content p {
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  margin-bottom: 32px;
+}
