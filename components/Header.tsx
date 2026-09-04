@@ -73,6 +73,7 @@ const Header = () => {
                <ul className="header-list" role="navigation" aria-label="Main navigation">
                   <li><Link href="/" draggable="false">{t('header_home')}</Link></li>
                   <li><Link href="/expats" draggable="false">{t('header_expats')}</Link></li>
+                  <li><Link href="/pricing" draggable="false">{t('header_pricing')}</Link></li>
                   <li><Link href="/about" draggable="false">{t('header_about')}</Link></li>
                   {user && <li><Link href="/messages" draggable="false">{t('header_chat')}</Link></li>}
                </ul>
@@ -173,9 +174,10 @@ const Header = () => {
                   <button className="exit-button" onClick={closeMenu} aria-label="Close menu">
                      <img draggable="false" src="/images/exit.png" alt="Close" />
                   </button>
-                  <Link href="/" onClick={closeMenu}>{t('header_home')}</Link>
-                  <Link href="/expats" onClick={closeMenu}>{t('header_expats')}</Link>
-                  <Link href="/about" onClick={closeMenu}>{t('header_about')}</Link>
+                   <Link href="/" onClick={closeMenu}>{t('header_home')}</Link>
+                   <Link href="/expats" onClick={closeMenu}>{t('header_expats')}</Link>
+                   <Link href="/pricing" onClick={closeMenu}>{t('header_pricing')}</Link>
+                   <Link href="/about" onClick={closeMenu}>{t('header_about')}</Link>
                   {user && <Link href="/messages" onClick={closeMenu}>{t('header_chat')}</Link>}
                   {user?.type === 'admin' && (
                      <Link href="/admin" onClick={closeMenu}>{t('header_admin_panel')}</Link>

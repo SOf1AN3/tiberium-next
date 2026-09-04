@@ -31,6 +31,7 @@
    "header_expats": "Expats",
    "header_contact": "Contact",
    "header_about": "About",
+   "header_pricing": "Pricing",
    "header_login": "Login",
    "header_logout": "Logout",
    "logout_confirm_message": "Do you want to log out?",
@@ -181,5 +182,35 @@
     "footer_nav_home": "Home",
     "footer_nav_about": "About",
     "footer_contact": "Contact",
-    "footer_copyright": "Copyrights © Tiberium Consulting {{year}}"
+    "footer_copyright": "Copyrights © Tiberium Consulting {{year}}",
+
+    "pricing_page_title": "Our Service Plans",
+    "pricing_page_subtitle": "Choose the level of support that fits your needs. Each tier is tailored to deliver the right value at the right pace.",
+    "pricing_badge_recommended": "Recommended",
+    "pricing_cta_contact": "Contact Us",
+    "pricing_note": "Your plan is assigned by our team after registration. Contact us to learn which tier is right for you.",
+
+    "pricing_simple_title": "Simple",
+    "pricing_simple_desc": "Essential consulting for individuals and small projects",
+    "pricing_simple_feat_1": "One strategic consulting session (1h)",
+    "pricing_simple_feat_2": "Professional orientation for expats",
+    "pricing_simple_feat_3": "Access to basic e-learning resources",
+    "pricing_simple_feat_4": "Administrative guidance for expats",
+
+    "pricing_advanced_title": "Advanced",
+    "pricing_advanced_desc": "Comprehensive support for growing businesses",
+    "pricing_advanced_feat_1": "Everything in Simple",
+    "pricing_advanced_feat_2": "Personalized market study report",
+    "pricing_advanced_feat_3": "Digital support & transformation",
+    "pricing_advanced_feat_4": "Housing & school integration for expats",
+    "pricing_advanced_feat_5": "2 consulting sessions per month",
+
+    "pricing_premium_title": "Premium",
+    "pricing_premium_desc": "Full-service consulting with a dedicated consultant",
+    "pricing_premium_feat_1": "Everything in Advanced",
+    "pricing_premium_feat_2": "Dedicated consultant",
+    "pricing_premium_feat_3": "Custom strategic action plan",
+    "pricing_premium_feat_4": "Social reintegration support for expats",
+    "pricing_premium_feat_5": "Priority support — 24h response",
+    "pricing_premium_feat_6": "Unlimited consulting sessions"
 }

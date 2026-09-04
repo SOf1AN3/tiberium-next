@@ -31,6 +31,7 @@
    "header_expats": "Expatriados",
    "header_contact": "Contacto",
    "header_about": "Nosotros",
+   "header_pricing": "Planes",
    "header_login": "Ingresar",
    "header_logout": "Salir",
    "logout_confirm_message": "¿Desea cerrar sesión?",
@@ -181,5 +182,35 @@
     "footer_nav_home": "Inicio",
     "footer_nav_about": "Nosotros",
     "footer_contact": "Contacto",
-    "footer_copyright": "Copyrights © Tiberium Consulting {{year}}"
+    "footer_copyright": "Copyrights © Tiberium Consulting {{year}}",
+
+    "pricing_page_title": "Nuestros Planes de Servicio",
+    "pricing_page_subtitle": "Elija el nivel de acompañamiento que se adapte a sus necesidades. Cada plan está diseñado para ofrecer el valor adecuado al ritmo adecuado.",
+    "pricing_badge_recommended": "Recomendado",
+    "pricing_cta_contact": "Contáctenos",
+    "pricing_note": "Su plan es asignado por nuestro equipo después del registro. Contáctenos para saber cuál plan es el adecuado para usted.",
+
+    "pricing_simple_title": "Simple",
+    "pricing_simple_desc": "Consultoría esencial para particulares y proyectos pequeños",
+    "pricing_simple_feat_1": "Una sesión de consultoría estratégica (1h)",
+    "pricing_simple_feat_2": "Orientación profesional para expatriados",
+    "pricing_simple_feat_3": "Acceso a recursos e-learning básicos",
+    "pricing_simple_feat_4": "Asesoramiento administrativo para expatriados",
+
+    "pricing_advanced_title": "Avanzado",
+    "pricing_advanced_desc": "Acompañamiento integral para empresas en crecimiento",
+    "pricing_advanced_feat_1": "Todo lo incluido en Simple",
+    "pricing_advanced_feat_2": "Informe de estudio de mercado personalizado",
+    "pricing_advanced_feat_3": "Soporte y acompañamiento digital",
+    "pricing_advanced_feat_4": "Reubicación e integración escolar para expatriados",
+    "pricing_advanced_feat_5": "2 sesiones de consultoría al mes",
+
+    "pricing_premium_title": "Premium",
+    "pricing_premium_desc": "Servicio completo con un consultor dedicado",
+    "pricing_premium_feat_1": "Todo lo incluido en Avanzado",
+    "pricing_premium_feat_2": "Consultor dedicado",
+    "pricing_premium_feat_3": "Plan de acción estratégico personalizado",
+    "pricing_premium_feat_4": "Apoyo a la reintegración social para expatriados",
+    "pricing_premium_feat_5": "Soporte prioritario — respuesta en 24h",
+    "pricing_premium_feat_6": "Sesiones de consultoría ilimitadas"
 }

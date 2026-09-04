@@ -19,9 +19,10 @@ const Footer = () => {
             </div>
             <div className="footer-col">
                <h4>{t('footer_navigation')}</h4>
-               <Link href="/">{t('footer_nav_home')}</Link>
-               <Link href="/expats">{t('header_expats')}</Link>
-               <Link href="/about">{t('footer_nav_about')}</Link>
+                <Link href="/">{t('footer_nav_home')}</Link>
+                <Link href="/expats">{t('header_expats')}</Link>
+                <Link href="/pricing">{t('header_pricing')}</Link>
+                <Link href="/about">{t('footer_nav_about')}</Link>
             </div>
             <div className="footer-col">
                <h4>{t('footer_contact')}</h4>

@@ -31,6 +31,7 @@
    "header_expats": "المغتربون",
    "header_contact": "اتصل بنا",
    "header_about": "من نحن",
+   "header_pricing": "الخطط",
    "header_login": "تسجيل الدخول",
    "header_logout": "تسجيل الخروج",
    "logout_confirm_message": "هل تريد تسجيل الخروج؟",
@@ -181,5 +182,35 @@
     "footer_nav_home": "الرئيسية",
     "footer_nav_about": "من نحن",
     "footer_contact": "اتصل بنا",
-    "footer_copyright": "Copyrights © Tiberium Consulting {{year}}"
+    "footer_copyright": "Copyrights © Tiberium Consulting {{year}}",
+
+    "pricing_page_title": "خطط خدمنا",
+    "pricing_page_subtitle": "اختر مستوى المرافقة الذي يناسب احتياجاتك. كل خطة مصممة لتقديم القيمة المناسبة بالسرعة المناسبة.",
+    "pricing_badge_recommended": "موصى به",
+    "pricing_cta_contact": "اتصل بنا",
+    "pricing_note": "يقوم فريقنا بتعيين خطتك بعد التسجيل. اتصل بنا لمعرفة أي خطة مناسبة لك.",
+
+    "pricing_simple_title": "بسيط",
+    "pricing_simple_desc": "استشارات أساسية للأفراد والمشاريع الصغيرة",
+    "pricing_simple_feat_1": "جلسة استشارة استراتيجية واحدة (1 ساعة)",
+    "pricing_simple_feat_2": "التوجيه المهني للمغتربين",
+    "pricing_simple_feat_3": "الوصول إلى موارد التعلم الإلكتروني الأساسية",
+    "pricing_simple_feat_4": "إرشاد إداري للمغتربين",
+
+    "pricing_advanced_title": "متقدم",
+    "pricing_advanced_desc": "مرافقة شاملة للشركات النامية",
+    "pricing_advanced_feat_1": "كل ما في البساطة مشمول",
+    "pricing_advanced_feat_2": "تقرير دراسة السوق المخصص",
+    "pricing_advanced_feat_3": "الدعم والمرافقة الرقمية",
+    "pricing_advanced_feat_4": "إعادة التوطين والاندماج المدرسي للمغتربين",
+    "pricing_advanced_feat_5": "جلستا استشارة شهرياً",
+
+    "pricing_premium_title": "بريميوم",
+    "pricing_premium_desc": "خدمة كاملة مع مستشار مخصص",
+    "pricing_premium_feat_1": "كل ما في المتقدم مشمول",
+    "pricing_premium_feat_2": "مستشار مخصص",
+    "pricing_premium_feat_3": "خطة عمل استراتيجية مخصصة",
+    "pricing_premium_feat_4": "دعم إعادة الاندماج الاجتماعي للمغتربين",
+    "pricing_premium_feat_5": "دعم أولوي — استجابة خلال 24 ساعة",
+    "pricing_premium_feat_6": "جلسات استشارة غير محدودة"
 }
