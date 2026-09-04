@@ -9,7 +9,7 @@ interface AuthenticatedWebSocket extends WebSocket {
 }
 
 interface WebSocketMessage {
-   type: 'MESSAGE_SEND' | 'MESSAGE_RECEIVE' | 'USER_TYPING' | 'CONNECTED' | 'ERROR';
+   type: 'MESSAGE_SEND' | 'MESSAGE_RECEIVE' | 'MESSAGE_SENT_ACK' | 'USER_TYPING' | 'CONNECTED' | 'ERROR';
    data: any;
 }
 
@@ -152,10 +152,11 @@ class WebSocketManager {
             content,
             timestamp,
             isSentByMe: false,
+            clientMessageId: data.clientMessageId,
          },
       };
 
-      // Send to receiver
+      // Send to receiver only
       const receiverConnections = this.userConnections.get(receiverId);
       if (receiverConnections) {
          receiverConnections.forEach((socket) => {
@@ -163,18 +164,14 @@ class WebSocketManager {
          });
       }
 
-      // Send confirmation to sender
-      const confirmationMessage: WebSocketMessage = {
-         type: 'MESSAGE_RECEIVE',
+      // Send ack to sender (not a full MESSAGE_RECEIVE, just confirmation)
+      this.sendToSocket(ws, {
+         type: 'MESSAGE_SENT_ACK',
          data: {
-            senderId: ws.userId,
-            receiverId,
-            content,
+            clientMessageId: data.clientMessageId,
             timestamp,
-            isSentByMe: true,
          },
-      };
-      this.sendToSocket(ws, confirmationMessage);
+      });
 
       console.log(`Message sent from ${ws.userId} to ${receiverId}`);
    }

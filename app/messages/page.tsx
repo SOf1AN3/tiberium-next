@@ -3,7 +3,7 @@
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useWebSocketMessages } from '@/lib/hooks/useWebSocketMessages';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 interface LinkedUser {
    _id: string;
@@ -61,6 +61,7 @@ export default function MessagesPage() {
    const [creatingConversation, setCreatingConversation] = useState(false);
 
    const isAdmin = user?.type === 'admin';
+   const chatBodyRef = useRef<HTMLDivElement>(null);
 
    useEffect(() => {
       if (!isAuthenticated) {
@@ -97,16 +98,32 @@ export default function MessagesPage() {
       const liveMessages = messages.filter(
          (msg) =>
             (msg.senderId === user.id && msg.receiverId === selectedUserId) ||
-            (msg.senderId === selectedUserId && msg.receiverId === user.id)
+            (msg.senderId === selectedUserId && msg.receiverId === user.id) ||
+            (msg.isSentByMe && msg.receiverId === selectedUserId && !msg.senderId)
       );
 
+      const allMessages = [...historyMessages, ...liveMessages];
+
       const seen = new Set<string>();
-      return [...historyMessages, ...liveMessages].filter((msg) => {
+      return allMessages.filter((msg) => {
          if (msg.id && seen.has(msg.id)) return false;
-         if (msg.id) seen.add(msg.id);
+         if (msg.id) {
+            seen.add(msg.id);
+            return true;
+         }
+
+         const key = `${msg.content}|${msg.isSentByMe ? '_self' : msg.senderId}|${msg.receiverId}|${Math.floor(new Date(msg.timestamp).getTime() / 2000)}`;
+         if (seen.has(key)) return false;
+         seen.add(key);
          return true;
       });
    }, [messages, historyMessages, selectedUserId, user]);
+
+   useEffect(() => {
+      if (chatBodyRef.current) {
+         chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+      }
+   }, [filteredMessages.length]);
 
    useEffect(() => {
       const loadHistory = async () => {
@@ -313,7 +330,7 @@ export default function MessagesPage() {
                      </div>
                   </header>
 
-                  <div className="chat-body">
+                  <div className="chat-body" ref={chatBodyRef}>
                      {filteredMessages.length === 0 ? (
                         <div className="chat-empty">
                            <p>No messages yet. Start the conversation!</p>

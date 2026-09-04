@@ -1,5 +1,5 @@
 export interface WebSocketMessage {
-   type: 'MESSAGE_SEND' | 'MESSAGE_RECEIVE' | 'USER_TYPING' | 'ERROR' | 'CONNECTED';
+   type: 'MESSAGE_SEND' | 'MESSAGE_RECEIVE' | 'MESSAGE_SENT_ACK' | 'USER_TYPING' | 'ERROR' | 'CONNECTED' | 'DISCONNECTED';
    data: any;
 }
 
@@ -12,6 +12,7 @@ class WebSocketClient {
    private reconnectDelay = 3000;
    private listeners: Map<string, Set<(data: any) => void>> = new Map();
    private messageQueue: WebSocketMessage[] = [];
+   private isConnecting = false;
 
    constructor(url: string, token: string) {
       this.url = url;
@@ -19,6 +20,16 @@ class WebSocketClient {
    }
 
    connect(): Promise<void> {
+      if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
+         return Promise.resolve();
+      }
+
+      if (this.isConnecting) {
+         return Promise.resolve();
+      }
+
+      this.isConnecting = true;
+
       return new Promise((resolve, reject) => {
          try {
             const wsUrl = new URL(this.url);
@@ -30,10 +41,10 @@ class WebSocketClient {
             this.ws = new WebSocket(wsUrl.toString());
 
             this.ws.onopen = () => {
+               this.isConnecting = false;
                console.log('✓ WebSocket connected');
                this.reconnectAttempts = 0;
 
-               // Send queued messages
                while (this.messageQueue.length > 0) {
                   const message = this.messageQueue.shift();
                   if (message) {
@@ -57,14 +68,19 @@ class WebSocketClient {
             this.ws.onerror = (error) => {
                console.error('WebSocket error:', error);
                this.emit('ERROR', { error: 'WebSocket connection error' });
+               this.isConnecting = false;
                reject(error);
             };
 
             this.ws.onclose = () => {
+               this.isConnecting = false;
+               this.ws = null;
                console.log('WebSocket disconnected');
+               this.emit('DISCONNECTED', {});
                this.attemptReconnect();
             };
          } catch (error) {
+            this.isConnecting = false;
             reject(error);
          }
       });
@@ -90,18 +106,18 @@ class WebSocketClient {
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
          this.ws.send(JSON.stringify(message));
       } else {
-         // Queue message if not connected
          this.messageQueue.push(message);
       }
    }
 
-   sendMessage(receiverId: string, content: string) {
+   sendMessage(receiverId: string, content: string, clientMessageId?: string) {
       this.send({
          type: 'MESSAGE_SEND',
          data: {
             receiverId,
             content,
             timestamp: new Date().toISOString(),
+            clientMessageId,
          },
       });
    }
@@ -112,7 +128,6 @@ class WebSocketClient {
       }
       this.listeners.get(event)!.add(callback);
 
-      // Return unsubscribe function
       return () => {
          this.listeners.get(event)?.delete(callback);
       };
@@ -145,10 +160,12 @@ class WebSocketClient {
    }
 }
 
-// Global WebSocket instance
 let wsClient: WebSocketClient | null = null;
 
 export function createWebSocketClient(token: string): WebSocketClient {
+   if (wsClient) {
+      return wsClient;
+   }
    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3000/ws';
    wsClient = new WebSocketClient(wsUrl, token);
    return wsClient;
