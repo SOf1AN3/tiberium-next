@@ -30,13 +30,14 @@ export async function POST(request: NextRequest) {
       // Hash password
       const hashedPassword = await hashPassword(password);
 
-      // Create user
+      // Create user — first user is automatically admin
+      const userCount = await User.countDocuments();
       const newUser = new User({
          name,
          email: email.toLowerCase(),
          password: hashedPassword,
-         type: 'simple',
-         isConfirmed: false,
+         type: userCount === 0 ? 'admin' : 'simple',
+         isConfirmed: userCount === 0,
       });
 
       await newUser.save();
