@@ -1,12 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 
 export default function SignupPage() {
+   return (
+      <Suspense fallback={null}>
+         <SignupForm />
+      </Suspense>
+   );
+}
+
+function SignupForm() {
    const { t } = useTranslation();
    const { signup, isAuthenticated, isLoading } = useAuth();
    const router = useRouter();
