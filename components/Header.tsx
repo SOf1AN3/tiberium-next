@@ -124,20 +124,22 @@ const Header = () => {
                         {profileOpen && (
                            <>
                               <div className="header-backdrop" onClick={() => setProfileOpen(false)}></div>
-                              <div className="profile-dropdown">
-                                 <div className="profile-head">
-                                    <div className="name">{user.name}</div>
-                                    <div className="role">
-                                       {user.type === 'admin' ? 'Admin' : 'Member'}
-                                    </div>
-                                 </div>
-                                 <button className="dropdown-item" onClick={handleSettingsClick}>
-                                    {user.type === 'admin' ? t('header_admin_panel') : t('header_chat')}
-                                 </button>
-                                 <button className="dropdown-item danger" onClick={() => setShowLogoutConfirm(true)}>
-                                    {t('header_logout')}
-                                 </button>
-                              </div>
+                               <div className="profile-dropdown">
+                                  <div className="profile-head">
+                                     <div className="name">{user.name}</div>
+                                     <div className="role">
+                                        {user.type === 'admin' ? 'Admin' : 'Member'}
+                                     </div>
+                                  </div>
+                                  {user.type === 'admin' && (
+                                     <button className="dropdown-item" onClick={handleSettingsClick}>
+                                        {t('header_admin_panel')}
+                                     </button>
+                                  )}
+                                  <button className="dropdown-item danger" onClick={() => setShowLogoutConfirm(true)}>
+                                     {t('header_logout')}
+                                  </button>
+                               </div>
                            </>
                         )}
                      </div>

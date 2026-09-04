@@ -165,5 +165,15 @@
     "chat_assign_client": "تعيين عميل",
     "chat_all_assigned": "جميع العملاء مُعيَّنون",
     "chat_cancel": "إلغاء",
-    "chat_toast_started": "تم بدء المحادثة"
+    "chat_toast_started": "تم بدء المحادثة",
+    "chat_messages_title": "الرسائل",
+    "chat_search_placeholder": "بحث...",
+    "chat_loading_conversations": "جارٍ تحميل المحادثات...",
+    "chat_connected": "متصل",
+    "chat_offline": "غير متصل",
+    "chat_no_messages": "لا توجد رسائل بعد. ابدأ المحادثة!",
+    "chat_type_placeholder": "اكتب رسالة...",
+    "chat_send": "إرسال",
+    "chat_assign_title": "تعيين عميل",
+    "chat_loading": "جارٍ التحميل..."
 }

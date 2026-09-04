@@ -13,6 +13,8 @@ export default function Home() {
       { icon: '💻', title: t('cards_digital_title'), content: t('cards_digital_content') },
    ];
 
+   const yearsSince2022 = new Date().getFullYear() - 2022;
+
    return (
       <>
          <section className="hero">
@@ -30,7 +32,7 @@ export default function Home() {
             </div>
             <div className="hero-stats">
                <div className="hero-stat">
-                  <strong>2022</strong>
+                  <strong>+{yearsSince2022}</strong>
                   <span>{t('home_stat_since')}</span>
                </div>
                <div className="hero-stat">
@@ -38,7 +40,7 @@ export default function Home() {
                   <span>{t('home_stat_clients')}</span>
                </div>
                <div className="hero-stat">
-                  <strong>4</strong>
+                  <strong>6</strong>
                   <span>{t('home_stat_services')}</span>
                </div>
             </div>

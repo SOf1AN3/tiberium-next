@@ -165,5 +165,15 @@
     "chat_assign_client": "Assigner un client",
     "chat_all_assigned": "Tous les clients sont assignés",
     "chat_cancel": "Annuler",
-    "chat_toast_started": "Conversation démarrée"
+    "chat_toast_started": "Conversation démarrée",
+    "chat_messages_title": "Messages",
+    "chat_search_placeholder": "Rechercher...",
+    "chat_loading_conversations": "Chargement des conversations...",
+    "chat_connected": "Connecté",
+    "chat_offline": "Hors ligne",
+    "chat_no_messages": "Aucun message pour l'instant. Commencez la conversation !",
+    "chat_type_placeholder": "Écrivez un message...",
+    "chat_send": "Envoyer",
+    "chat_assign_title": "Assigner un client",
+    "chat_loading": "Chargement..."
 }

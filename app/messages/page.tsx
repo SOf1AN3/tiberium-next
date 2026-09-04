@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/contexts/AuthContext';
 import { useWebSocketMessages } from '@/lib/hooks/useWebSocketMessages';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface LinkedUser {
    _id: string;
@@ -44,15 +45,16 @@ const toInitials = (name: string) =>
       .join('');
 
 export default function MessagesPage() {
-   const { user, token, isAuthenticated } = useAuth();
+   const { user, token, isAuthenticated, isLoading } = useAuth();
    const router = useRouter();
    const { messages, isConnected, sendMessage } = useWebSocketMessages();
+   const { t } = useTranslation();
 
    const [conversations, setConversations] = useState<LinkedUser[]>([]);
    const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
    const [messageText, setMessageText] = useState('');
    const [search, setSearch] = useState('');
-   const [isLoading, setIsLoading] = useState(true);
+   const [isLoadingConversations, setIsLoadingConversations] = useState(true);
    const [historyMessages, setHistoryMessages] = useState<Message[]>([]);
 
    const [showNewClientModal, setShowNewClientModal] = useState(false);
@@ -63,11 +65,13 @@ export default function MessagesPage() {
    const isAdmin = user?.type === 'admin';
    const chatBodyRef = useRef<HTMLDivElement>(null);
 
+   const [showChat, setShowChat] = useState(false);
+
    useEffect(() => {
-      if (!isAuthenticated) {
+      if (!isLoading && !isAuthenticated) {
          router.push('/login');
       }
-   }, [isAuthenticated, router]);
+   }, [isAuthenticated, isLoading, router]);
 
    useEffect(() => {
       const fetchConversations = async () => {
@@ -85,7 +89,7 @@ export default function MessagesPage() {
          } catch (error) {
             console.error('Failed to fetch conversations:', error);
          } finally {
-            setIsLoading(false);
+            setIsLoadingConversations(false);
          }
       };
 
@@ -213,6 +217,7 @@ export default function MessagesPage() {
                setConversations(data.conversations || []);
             }
             setSelectedUserId(clientId);
+            setShowChat(true);
          }
       } catch (error) {
          console.error('Failed to create conversation:', error);
@@ -237,11 +242,25 @@ export default function MessagesPage() {
             setConversations((prev) => prev.filter((c) => c._id !== conv._id));
             setSelectedUserId(null);
             setHistoryMessages([]);
+            setShowChat(false);
          }
       } catch (error) {
          console.error('Failed to close conversation:', error);
       }
    };
+
+   const selectConversation = (userId: string) => {
+      setSelectedUserId(userId);
+      setShowChat(true);
+   };
+
+   const backToSidebar = () => {
+      setShowChat(false);
+   };
+
+   if (isLoading) {
+      return null;
+   }
 
    if (!isAuthenticated) {
       return null;
@@ -254,13 +273,13 @@ export default function MessagesPage() {
 
    return (
       <div className="chat-page">
-         <aside className="chat-sidebar">
+         <aside className={`chat-sidebar ${showChat ? 'chat-hidden' : ''}`}>
             <div className="chat-sidebar-header">
-               <h2>Messages</h2>
+               <h2>{t('chat_messages_title')}</h2>
                <input
                   type="search"
                   className="chat-search"
-                  placeholder="Search..."
+                  placeholder={t('chat_search_placeholder')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                />
@@ -270,28 +289,28 @@ export default function MessagesPage() {
                      style={{ marginTop: 12, width: '100%' }}
                      onClick={openNewClientModal}
                   >
-                     + New client
+                     {t('chat_new_client')}
                   </button>
                )}
             </div>
             <div className="chat-list">
-               {isLoading ? (
+               {isLoadingConversations ? (
                   <div className="chat-empty">
-                     <p>Loading conversations...</p>
+                     <p>{t('chat_loading_conversations')}</p>
                   </div>
                ) : visibleConversations.length === 0 ? (
                   <div className="chat-empty">
                      {isAdmin ? (
-                        <p>No clients assigned yet</p>
+                        <p>{t('chat_no_conversations_admin')}</p>
                      ) : (
-                        <p>Waiting for an admin to contact you...</p>
+                        <p>{t('chat_no_conversations_client')}</p>
                      )}
                   </div>
                ) : (
                   visibleConversations.map((conv) => (
                      <button
                         key={conv.linkedUserId}
-                        onClick={() => setSelectedUserId(conv.linkedUserId)}
+                        onClick={() => selectConversation(conv.linkedUserId)}
                         className={`chat-item ${selectedUserId === conv.linkedUserId ? 'selected' : ''}`}
                      >
                         <span className="chat-avatar">
@@ -310,22 +329,25 @@ export default function MessagesPage() {
             </div>
          </aside>
 
-         <section className="chat-main">
+         <section className={`chat-main ${!showChat ? 'chat-hidden' : ''}`}>
             {selectedUserId ? (
                <>
                   <header className="chat-header">
-                     <h2>{selectedConv?.linkedUser.name || 'Chat'}</h2>
+                     <button className="chat-back-btn" onClick={backToSidebar} aria-label="Back">
+                        ←
+                     </button>
+                     <h2>{selectedConv?.linkedUser.name || t('header_chat')}</h2>
                      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                         <span className={`chat-status ${isConnected ? 'online' : 'offline'}`}>
                            <span className="chat-status-dot"></span>
-                           {isConnected ? 'Connected' : 'Offline'}
+                           {isConnected ? t('chat_connected') : t('chat_offline')}
                         </span>
                         <button
                            className="btn btn-ghost"
                            style={{ fontSize: '0.8rem', color: 'var(--danger)' }}
                            onClick={closeConversation}
                         >
-                           Close
+                           {t('chat_close')}
                         </button>
                      </div>
                   </header>
@@ -333,7 +355,7 @@ export default function MessagesPage() {
                   <div className="chat-body" ref={chatBodyRef}>
                      {filteredMessages.length === 0 ? (
                         <div className="chat-empty">
-                           <p>No messages yet. Start the conversation!</p>
+                           <p>{t('chat_no_messages')}</p>
                         </div>
                      ) : (
                         filteredMessages.map((msg, idx) => (
@@ -356,23 +378,23 @@ export default function MessagesPage() {
                         className="input-base"
                         value={messageText}
                         onChange={(e) => setMessageText(e.target.value)}
-                        placeholder="Type a message..."
+                        placeholder={t('chat_type_placeholder')}
                      />
                      <button
                         type="submit"
                         className="btn btn-primary"
                         disabled={!messageText.trim() || !isConnected}
                      >
-                        Send
+                        {t('chat_send')}
                      </button>
                   </form>
                </>
             ) : (
                <div className="chat-empty">
                   {isAdmin ? (
-                     <p>Select a client or assign a new one</p>
+                     <p>{t('chat_select_or_assign')}</p>
                   ) : (
-                     <p>Your admin will reach out to you soon</p>
+                     <p>{t('chat_waiting_admin')}</p>
                   )}
                </div>
             )}
@@ -389,16 +411,16 @@ export default function MessagesPage() {
                   style={{ maxWidth: 480, maxHeight: '80vh', overflow: 'auto' }}
                >
                   <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
-                     <h3>Assign a client</h3>
+                     <h3>{t('chat_assign_title')}</h3>
                   </div>
                   <div style={{ padding: 16 }}>
                      {loadingUnassigned ? (
                         <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
-                           Loading...
+                           {t('chat_loading')}
                         </p>
                      ) : unassignedClients.length === 0 ? (
                         <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
-                           All clients are assigned
+                           {t('chat_all_assigned')}
                         </p>
                      ) : (
                         unassignedClients.map((client) => (
@@ -438,7 +460,7 @@ export default function MessagesPage() {
                         className="btn btn-ghost"
                         onClick={() => setShowNewClientModal(false)}
                      >
-                        Cancel
+                        {t('chat_cancel')}
                      </button>
                   </div>
                </div>

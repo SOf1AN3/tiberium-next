@@ -122,6 +122,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -130,6 +131,13 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+  min-width: 0;
+}
+
+img, video, svg {
+  max-width: 100%;
+  height: auto;
 }
 
 a {
@@ -179,6 +187,8 @@ img {
   font-weight: 600;
   font-size: 0.95rem;
   transition: all var(--ease);
+  max-width: 100%;
+  word-break: break-word;
 }
 
 .btn-primary {
@@ -866,6 +876,7 @@ img {
   text-align: center;
   padding: 60px 24px;
   overflow: hidden;
+  width: 100%;
   background:
     radial-gradient(60% 60% at 20% 20%, rgba(79, 70, 229, 0.12), transparent 60%),
     radial-gradient(50% 50% at 80% 30%, rgba(124, 58, 237, 0.12), transparent 60%),
@@ -892,6 +903,8 @@ img {
   color: var(--text-muted);
   max-width: 560px;
   margin: 20px auto 32px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .hero-actions {
@@ -899,6 +912,8 @@ img {
   gap: 14px;
   justify-content: center;
   flex-wrap: wrap;
+  width: 100%;
+  max-width: 560px;
 }
 
 .hero-stats {
@@ -934,7 +949,7 @@ img {
   margin: 0 auto;
   padding: 80px 24px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
   gap: 20px;
 }
 
@@ -2481,8 +2496,84 @@ img {
     width: 100%;
   }
 
-  .chat-main {
+  .chat-sidebar.chat-hidden {
     display: none;
+  }
+
+  .chat-main {
+    width: 100%;
+  }
+
+  .chat-main.chat-hidden {
+    display: none;
+  }
+
+  .chat-back-btn {
+    display: flex;
+  }
+
+  .chat-mobile-overlay {
+    display: flex;
+  }
+
+  .feature-grid {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding: 48px 24px;
+    gap: 14px;
+    max-width: 100%;
+  }
+
+  .feature-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .feature-grid {
+    scrollbar-width: none;
+  }
+
+  .feature-card {
+    flex: 0 0 75vw;
+    scroll-snap-align: start;
+    padding: 22px;
+  }
+
+  .feature-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+  }
+
+  .hero {
+    padding: 40px 16px;
+    min-height: auto;
+    padding-top: 60px;
+    padding-bottom: 60px;
+  }
+
+  .hero h1 {
+    font-size: clamp(1.8rem, 6vw, 2.6rem);
+  }
+
+  .hero p {
+    font-size: 1rem;
+    margin: 16px auto 24px;
+  }
+
+  .hero-stats {
+    gap: 24px;
+    margin-top: 40px;
+  }
+
+  .hero-stat strong {
+    font-size: 1.5rem;
+  }
+
+  .hero-stat span {
+    font-size: 0.8rem;
   }
 }
 
@@ -2533,4 +2624,93 @@ img {
   .question.active .answer {
     padding: 0 20px 20px 60px;
   }
+
+  .feature-card h3 {
+    font-size: 0.95rem;
+  }
+
+  .feature-card p {
+    font-size: 0.85rem;
+  }
+}
+
+/* ============================================================
+   Chat back button (mobile only)
+   ============================================================ */
+.chat-back-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all var(--ease);
+}
+
+.chat-back-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.chat-mobile-overlay {
+  display: none;
+}
+
+/* ============================================================
+   RTL support for chat bubbles
+   ============================================================ */
+[dir="rtl"] .chat-bubble.sent {
+  border-bottom-right-radius: var(--radius-lg);
+  border-bottom-left-radius: 4px;
+}
+
+[dir="rtl"] .chat-bubble.received {
+  border-bottom-left-radius: var(--radius-lg);
+  border-bottom-right-radius: 4px;
+}
+
+[dir="rtl"] .chat-bubble.sent {
+  align-self: flex-start;
+}
+
+[dir="rtl"] .chat-bubble.received {
+  align-self: flex-end;
+}
+
+[dir="rtl"] .chat-input-row {
+  direction: rtl;
+}
+
+[dir="rtl"] .chat-sidebar-header {
+  direction: rtl;
+  text-align: right;
+}
+
+[dir="rtl"] .chat-header {
+  direction: rtl;
+}
+
+[dir="rtl"] .chat-item {
+  text-align: right;
+}
+
+[dir="rtl"] .question.active .answer {
+  padding: 0 80px 24px 24px;
+}
+
+@media (max-width: 560px) {
+  [dir="rtl"] .question.active .answer {
+    padding: 0 20px 20px 60px;
+  }
+}
+
+[dir="rtl"] .chat-search {
+  text-align: right;
 }
